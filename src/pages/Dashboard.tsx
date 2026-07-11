@@ -85,7 +85,7 @@ const Dashboard: React.FC = () => {
                 <LineChart data={data.metrics}>
                   <XAxis dataKey="month" />
                   <YAxis />
-                  <Tooltip formatter={(value: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(value)} />
+                  <Tooltip formatter={(value: any) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(value)} />
                   <Line type="monotone" dataKey="revenue" stroke="#ecad0a" strokeWidth={3} dot={{ r: 4 }} />
                 </LineChart>
               </ResponsiveContainer>

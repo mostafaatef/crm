@@ -29,7 +29,7 @@ const Organizations: React.FC = () => {
 
   const fetchOrgs = async () => {
     const res = await fetch('/api/organizations');
-    const data = await res.json();
+    const data: Organization[] = await res.json();
     setOrgs(data);
   };
 
