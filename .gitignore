@@ -16,10 +16,15 @@ build/
 # SQLite database (generated and seeded at runtime)
 *.sqlite
 *.sqlite3
+*.sqlite-shm
+*.sqlite-wal
 *.db
 *.db-journal
 *.db-wal
 *.db-shm
+
+# Cloudflare
+.wrangler/
 
 # Logs
 *.log

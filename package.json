@@ -1,0 +1,55 @@
+{
+  "name": "crm",
+  "version": "1.0.0",
+  "description": "Setup for building **Personal CRM** with the [Pi coding agent](https://pi.dev) and open-source models (DeepSeek V4 Pro / GLM 5.2) via OpenRouter. Everything runs inside a **VS Code Dev Container**, so the agent is sandboxed to this project and the whole toolchain installs itself.",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "seed": "wrangler d1 execute crm-db --local --file=./server/schema.sql && wrangler d1 execute crm-db --local --file=./server/seed.sql",
+    "test": "vitest run",
+    "deploy": "npm run build && wrangler pages deploy"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mostafaatef/crm.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/mostafaatef/crm/issues"
+  },
+  "homepage": "https://github.com/mostafaatef/crm#readme",
+  "dependencies": {
+    "@hello-pangea/dnd": "^18.0.1",
+    "@hono/node-server": "^2.0.8",
+    "better-sqlite3": "^12.11.1",
+    "concurrently": "^10.0.3",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "hono": "^4.12.29",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7",
+    "react-router-dom": "^7.18.1",
+    "recharts": "^3.9.2"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^5.20260711.1",
+    "@hono/vite-dev-server": "^0.26.1",
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/node": "^26.1.1",
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.3",
+    "tsx": "^4.23.0",
+    "typescript": "^7.0.2",
+    "vite": "^8.1.4",
+    "vitest": "^4.1.10",
+    "wrangler": "^4.110.0"
+  }
+}
