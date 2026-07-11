@@ -8,7 +8,7 @@
     "build": "tsc && vite build",
     "seed": "wrangler d1 execute crm-db --local --file=./server/schema.sql && wrangler d1 execute crm-db --local --file=./server/seed.sql",
     "test": "vitest run",
-    "deploy": "npm run build && wrangler pages deploy"
+    "deploy": "npm run build && wrangler deploy"
   },
   "repository": {
     "type": "git",

@@ -9,4 +9,4 @@ binding = "ASSETS"
 [[d1_databases]]
 binding = "DB"
 database_name = "crm-db"
-database_id = "local-dev-db"
+database_id = "20871eab-b731-4683-ad37-309a1319f795"
