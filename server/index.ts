@@ -26,7 +26,7 @@ app.get('*', async (c) => {
   // Let the ASSETS binding serve the index.html for unknown paths
   const url = new URL(c.req.url);
   url.pathname = '/';
-  return c.env.ASSETS.fetch(new Request(url.toString(), c.req.raw));
+  return c.env.ASSETS.fetch(new Request(url.toString(), c.req.raw as any) as any) as any;
 });
 
 export default app;
