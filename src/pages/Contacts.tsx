@@ -170,7 +170,18 @@ const Contacts: React.FC = () => {
 
   const columns = [
     { header: 'Name', accessor: 'name' as keyof Contact },
-    { header: 'Email', accessor: 'email' as keyof Contact },
+    { 
+      header: 'Email', 
+      accessor: (contact: Contact) => contact.email ? (
+        <a 
+          href={`mailto:${contact.email}`}
+          style={{ color: 'var(--color-primary)', textDecoration: 'none' }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          {contact.email}
+        </a>
+      ) : '-' 
+    },
     { header: 'Organization', accessor: 'organization_name' as keyof Contact },
     { header: 'Status', accessor: 'status' as keyof Contact },
     { 

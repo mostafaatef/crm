@@ -46,7 +46,17 @@ const ContactDetail: React.FC = () => {
       <div className="card">
         <p><strong>Organization:</strong> {contact.organization_name || 'N/A'}</p>
         <p><strong>Job Title:</strong> {contact.job_title || 'N/A'}</p>
-        <p><strong>Email:</strong> {contact.email || 'N/A'}</p>
+        <p>
+          <strong>Email:</strong>{' '}
+          {contact.email ? (
+            <a 
+              href={`mailto:${contact.email}`} 
+              style={{ color: 'var(--color-primary)', textDecoration: 'none' }}
+            >
+              {contact.email}
+            </a>
+          ) : 'N/A'}
+        </p>
         <p><strong>Phone:</strong> {contact.phone || 'N/A'}</p>
         <p><strong>Status:</strong> {contact.status}</p>
       </div>

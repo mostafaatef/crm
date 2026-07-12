@@ -80,7 +80,7 @@ const OrganizationDetail: React.FC = () => {
               <ul style={{ listStyle: 'none' }}>
                 {contacts.map(c => (
                   <li key={c.id} style={{ padding: '8px 0', borderBottom: '1px solid var(--color-border)', cursor: 'pointer' }} onClick={() => navigate(`/contacts/${c.id}`)}>
-                    <strong>{c.name}</strong> - {c.email || 'No email'} ({c.status})
+                    <strong>{c.name}</strong> - {c.email ? <a href={`mailto:${c.email}`} style={{ color: 'var(--color-primary)', textDecoration: 'none' }} onClick={(e) => e.stopPropagation()}>{c.email}</a> : 'No email'} ({c.status})
                   </li>
                 ))}
               </ul>
