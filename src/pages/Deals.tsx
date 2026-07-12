@@ -135,7 +135,12 @@ const Deals: React.FC = () => {
     <div>
       <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <h1 className="page-title">Deals</h1>
-        <Button onClick={() => handleOpenModal()}>Add Deal</Button>
+        <div style={{ display: 'flex', gap: '8px' }}>
+          <a href="/api/export/deals" target="_blank" className="btn btn-secondary" style={{ textDecoration: 'none' }}>
+            Export CSV
+          </a>
+          <Button onClick={() => handleOpenModal()}>Add Deal</Button>
+        </div>
       </div>
       
       <div style={{ marginBottom: '20px', maxWidth: '300px' }}>

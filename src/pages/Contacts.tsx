@@ -107,6 +107,60 @@ const Contacts: React.FC = () => {
     fetchData();
   };
 
+  const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = async (event) => {
+      const text = event.target?.result as string;
+      if (!text) return;
+
+      // Extremely simple CSV parser for happy-path CSVs
+      const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+      if (lines.length < 2) return;
+      
+      const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
+      
+      const payload = lines.slice(1).map(line => {
+        // Handle quotes simply
+        const values = line.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g) || [];
+        const contact: any = {};
+        headers.forEach((header, idx) => {
+          let val = values[idx] ? values[idx].replace(/^"|"$/g, '') : null;
+          contact[header] = val;
+        });
+        return {
+          name: contact.name || 'Unknown',
+          email: contact.email || null,
+          phone: contact.phone || null,
+          job_title: contact.job_title || null,
+          status: 'lead'
+        };
+      });
+
+      try {
+        const res = await fetch('/api/contacts/batch', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        if (res.ok) {
+          alert('Import successful!');
+          fetchData();
+        } else {
+          alert('Import failed.');
+        }
+      } catch (err) {
+        console.error(err);
+        alert('Import failed.');
+      }
+    };
+    reader.readAsText(file);
+    // Reset input
+    e.target.value = '';
+  };
+
   const filteredContacts = contacts.filter(c => {
     const matchesSearch = c.name.toLowerCase().includes(search.toLowerCase()) || 
                           (c.email && c.email.toLowerCase().includes(search.toLowerCase()));
@@ -134,7 +188,22 @@ const Contacts: React.FC = () => {
     <div>
       <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <h1 className="page-title">Contacts</h1>
-        <Button onClick={() => handleOpenModal()}>Add Contact</Button>
+        <div style={{ display: 'flex', gap: '8px' }}>
+          <a href="/api/export/contacts" target="_blank" className="btn btn-secondary" style={{ textDecoration: 'none' }}>
+            Export CSV
+          </a>
+          <input 
+            type="file" 
+            id="csv-import" 
+            accept=".csv"
+            style={{ display: 'none' }} 
+            onChange={handleImport}
+          />
+          <label htmlFor="csv-import" className="btn btn-secondary" style={{ cursor: 'pointer', margin: 0 }}>
+            Import CSV
+          </label>
+          <Button onClick={() => handleOpenModal()}>Add Contact</Button>
+        </div>
       </div>
       
       <div style={{ display: 'flex', gap: '16px', marginBottom: '20px', maxWidth: '500px' }}>
