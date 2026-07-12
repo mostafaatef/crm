@@ -9,6 +9,12 @@ financeRouter.use('*', async (c, next) => {
   await next();
 });
 
+// Overview
+financeRouter.get('/overview', async (c) => {
+  const result = await finance.getOverview(c.env.DB, c.get('tenantId')!);
+  return c.json(result);
+});
+
 // Contracts
 financeRouter.get('/contracts/all', async (c) => {
   const result = await finance.getAllContracts(c.env.DB, c.get('tenantId')!);

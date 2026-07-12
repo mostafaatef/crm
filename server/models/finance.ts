@@ -9,6 +9,29 @@ function buildUpdateQuery(tableName: string, fields: string[], data: any, tenant
 }
 
 export const finance = {
+  // Overview
+  getOverview: async (db: D1Database, tenantId: number) => {
+    const revenueRow = await db.prepare('SELECT SUM(amount) as total FROM invoices WHERE tenant_id = ? AND status = ?').bind(tenantId, 'Paid').first<{total: number}>();
+    const revenue = revenueRow?.total || 0;
+
+    const expenseRow = await db.prepare('SELECT SUM(amount) as total FROM expenses WHERE tenant_id = ?').bind(tenantId).first<{total: number}>();
+    const expenses = expenseRow?.total || 0;
+
+    const subRow = await db.prepare('SELECT SUM(committed_value) as total FROM subcontracts WHERE tenant_id = ? AND status != ?').bind(tenantId, 'Draft').first<{total: number}>();
+    const subcontracts = subRow?.total || 0;
+
+    const costs = expenses + subcontracts;
+    const profit = revenue - costs;
+
+    return {
+      revenue,
+      costs,
+      expenses,
+      subcontracts,
+      profit
+    };
+  },
+
   // Contracts
   getAllContracts: async (db: D1Database, tenantId: number) => {
     return (await db.prepare('SELECT c.*, d.name as deal_name FROM contracts c LEFT JOIN deals d ON c.deal_id = d.id WHERE c.tenant_id = ? ORDER BY c.created_at DESC').bind(tenantId).all()).results;

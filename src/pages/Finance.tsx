@@ -1,14 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Table } from '../components/ui/Table';
+import { FinanceOverview } from '../components/FinanceOverview';
 
 const Finance: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'contracts' | 'estimates' | 'subcontracts' | 'expenses' | 'invoices'>('contracts');
+  const [activeTab, setActiveTab] = useState<'overview' | 'contracts' | 'estimates' | 'subcontracts' | 'expenses' | 'invoices'>('overview');
   const [data, setData] = useState<any[]>([]);
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchData = async () => {
+      if (activeTab === 'overview') return;
       const res = await fetch(`/api/finance/${activeTab}/all`);
       if (res.ok) {
         setData(await res.json());
@@ -19,6 +21,8 @@ const Finance: React.FC = () => {
 
   const renderContent = () => {
     switch (activeTab) {
+      case 'overview':
+        return <FinanceOverview />;
       case 'contracts':
         return (
           <Table 
@@ -104,6 +108,12 @@ const Finance: React.FC = () => {
 
       <div className="card">
         <div style={{ display: 'flex', gap: '8px', marginBottom: '20px', borderBottom: '1px solid var(--color-border)', paddingBottom: '8px' }}>
+          <button 
+            className={`btn ${activeTab === 'overview' ? 'btn-primary' : 'btn-ghost'}`} 
+            onClick={() => setActiveTab('overview')}
+          >
+            Overview
+          </button>
           <button 
             className={`btn ${activeTab === 'contracts' ? 'btn-primary' : 'btn-ghost'}`} 
             onClick={() => setActiveTab('contracts')}
