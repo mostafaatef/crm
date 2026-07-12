@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '../components/ui/Button';
 import { ActivityTimeline } from '../components/ui/ActivityTimeline';
 import DealFinanceSection from '../components/finance/DealFinanceSection';
+import AttachmentsSection from '../components/AttachmentsSection';
 
 interface Deal {
   id: number;
@@ -45,6 +46,7 @@ const DealDetail: React.FC = () => {
       </div>
 
       <DealFinanceSection dealId={Number(id)} />
+      <AttachmentsSection dealId={Number(id)} />
       
       <div style={{ marginTop: '24px' }}>
         <h2 style={{ marginBottom: '16px', fontSize: '1.25rem' }}>Activity Timeline</h2>

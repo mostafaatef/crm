@@ -119,3 +119,18 @@ CREATE TABLE IF NOT EXISTS payments (
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (invoice_id) REFERENCES invoices (id) ON DELETE CASCADE
 );
+
+CREATE TABLE IF NOT EXISTS attachments (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  deal_id INTEGER,
+  contact_id INTEGER,
+  organization_id INTEGER,
+  file_name TEXT NOT NULL,
+  content_type TEXT NOT NULL,
+  size INTEGER NOT NULL,
+  object_key TEXT NOT NULL,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (deal_id) REFERENCES deals (id) ON DELETE CASCADE,
+  FOREIGN KEY (contact_id) REFERENCES contacts (id) ON DELETE CASCADE,
+  FOREIGN KEY (organization_id) REFERENCES organizations (id) ON DELETE CASCADE
+);
