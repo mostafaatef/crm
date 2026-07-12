@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '../components/ui/Button';
 import { ActivityTimeline } from '../components/ui/ActivityTimeline';
+import DealFinanceSection from '../components/finance/DealFinanceSection';
 
 interface Deal {
   id: number;
@@ -42,6 +43,8 @@ const DealDetail: React.FC = () => {
         <p><strong>Value:</strong> {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(deal.value)}</p>
         <p><strong>Close Date:</strong> {deal.close_date || 'N/A'}</p>
       </div>
+
+      <DealFinanceSection dealId={Number(id)} />
       
       <div style={{ marginTop: '24px' }}>
         <h2 style={{ marginBottom: '16px', fontSize: '1.25rem' }}>Activity Timeline</h2>
