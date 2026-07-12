@@ -2,6 +2,7 @@ import type { D1Database } from '@cloudflare/workers-types';
 
 export interface Contact {
   id?: number;
+  tenant_id?: number;
   organization_id?: number | null;
   name: string;
   email?: string | null;
@@ -12,21 +13,22 @@ export interface Contact {
 }
 
 export const contacts = {
-  getAll: async (db: D1Database) => {
-    const { results } = await db.prepare('SELECT * FROM contacts ORDER BY name ASC').all<Contact>();
+  getAll: async (db: D1Database, tenantId: number) => {
+    const { results } = await db.prepare('SELECT * FROM contacts WHERE tenant_id = ? ORDER BY name ASC').bind(tenantId).all<Contact>();
     return results;
   },
-  getById: async (db: D1Database, id: number) => {
-    return await db.prepare('SELECT * FROM contacts WHERE id = ?').bind(id).first<Contact>();
+  getById: async (db: D1Database, tenantId: number, id: number) => {
+    return await db.prepare('SELECT * FROM contacts WHERE tenant_id = ? AND id = ?').bind(tenantId, id).first<Contact>();
   },
-  getByOrganizationId: async (db: D1Database, orgId: number) => {
-    const { results } = await db.prepare('SELECT * FROM contacts WHERE organization_id = ?').bind(orgId).all<Contact>();
+  getByOrganizationId: async (db: D1Database, tenantId: number, orgId: number) => {
+    const { results } = await db.prepare('SELECT * FROM contacts WHERE tenant_id = ? AND organization_id = ?').bind(tenantId, orgId).all<Contact>();
     return results;
   },
-  create: async (db: D1Database, contact: Contact) => {
-    const info = await db.prepare(`INSERT INTO contacts (organization_id, name, email, phone, job_title, status) 
-                             VALUES (?1, ?2, ?3, ?4, ?5, ?6) RETURNING *`)
+  create: async (db: D1Database, tenantId: number, contact: Contact) => {
+    const info = await db.prepare(`INSERT INTO contacts (tenant_id, organization_id, name, email, phone, job_title, status) 
+                             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7) RETURNING *`)
       .bind(
+        tenantId,
         contact.organization_id || null,
         contact.name,
         contact.email || null,
@@ -37,17 +39,17 @@ export const contacts = {
       .first<Contact>();
     return info;
   },
-  update: async (db: D1Database, id: number, contact: Partial<Contact>) => {
+  update: async (db: D1Database, tenantId: number, id: number, contact: Partial<Contact>) => {
     const fields = ['organization_id', 'name', 'email', 'phone', 'job_title', 'status'].filter(f => contact[f as keyof Contact] !== undefined);
-    if (fields.length === 0) return await contacts.getById(db, id);
+    if (fields.length === 0) return await contacts.getById(db, tenantId, id);
     const sets = fields.map((f, i) => `${f} = ?${i + 1}`).join(', ');
     const values = fields.map(f => contact[f as keyof Contact]);
-    const info = await db.prepare(`UPDATE contacts SET ${sets} WHERE id = ?${fields.length + 1} RETURNING *`)
-      .bind(...values, id)
+    const info = await db.prepare(`UPDATE contacts SET ${sets} WHERE tenant_id = ?${fields.length + 1} AND id = ?${fields.length + 2} RETURNING *`)
+      .bind(...values, tenantId, id)
       .first<Contact>();
     return info;
   },
-  delete: async (db: D1Database, id: number) => {
-    await db.prepare('DELETE FROM contacts WHERE id = ?').bind(id).run();
+  delete: async (db: D1Database, tenantId: number, id: number) => {
+    await db.prepare('DELETE FROM contacts WHERE tenant_id = ? AND id = ?').bind(tenantId, id).run();
   }
 };

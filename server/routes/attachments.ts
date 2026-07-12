@@ -1,8 +1,13 @@
-import type { D1Database, R2Bucket } from '@cloudflare/workers-types';
 import { Hono } from 'hono';
+import { Env } from '../index';
 import { attachments } from '../models/attachments';
 
-export const attachmentsRouter = new Hono<{ Bindings: { DB: D1Database, BUCKET: R2Bucket } }>();
+export const attachmentsRouter = new Hono<Env>();
+
+attachmentsRouter.use('*', async (c, next) => {
+  if (!c.get('tenantId')) return c.json({ error: 'Tenant ID required' }, 401);
+  await next();
+});
 
 // Upload attachment
 attachmentsRouter.post('/upload', async (c) => {
@@ -24,7 +29,7 @@ attachmentsRouter.post('/upload', async (c) => {
   });
 
   // Save to DB
-  const record = await attachments.createAttachment(c.env.DB, {
+  const record = await attachments.createAttachment(c.env.DB, c.get('tenantId')!, {
     deal_id: dealId ? Number(dealId) : null,
     contact_id: contactId ? Number(contactId) : null,
     file_name: file.name,
@@ -39,7 +44,7 @@ attachmentsRouter.post('/upload', async (c) => {
 // Download/View attachment
 attachmentsRouter.get('/:id/download', async (c) => {
   const id = Number(c.req.param('id'));
-  const record: any = await attachments.getAttachmentById(c.env.DB, id);
+  const record: any = await attachments.getAttachmentById(c.env.DB, c.get('tenantId')!, id);
   
   if (!record) {
     return c.json({ error: 'Not found' }, 404);
@@ -61,13 +66,13 @@ attachmentsRouter.get('/:id/download', async (c) => {
 // Delete attachment
 attachmentsRouter.delete('/:id', async (c) => {
   const id = Number(c.req.param('id'));
-  const record: any = await attachments.getAttachmentById(c.env.DB, id);
+  const record: any = await attachments.getAttachmentById(c.env.DB, c.get('tenantId')!, id);
   if (!record) {
     return c.json({ error: 'Not found' }, 404);
   }
   
   await c.env.BUCKET.delete(record.object_key);
-  await attachments.deleteAttachment(c.env.DB, id);
+  await attachments.deleteAttachment(c.env.DB, c.get('tenantId')!, id);
   
   return c.json({ success: true });
 });
@@ -75,6 +80,6 @@ attachmentsRouter.delete('/:id', async (c) => {
 // Get attachments for a deal
 attachmentsRouter.get('/deals/:dealId', async (c) => {
   const dealId = Number(c.req.param('dealId'));
-  const results = await attachments.getAttachmentsByDealId(c.env.DB, dealId);
+  const results = await attachments.getAttachmentsByDealId(c.env.DB, c.get('tenantId')!, dealId);
   return c.json(results);
 });

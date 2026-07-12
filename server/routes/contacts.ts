@@ -1,69 +1,65 @@
-import type { D1Database } from '@cloudflare/workers-types';
 import { Hono } from 'hono';
+import { Env } from '../index';
 import { contacts } from '../models/contacts';
-import { activities } from '../models/activities';
 
-export const contactRouter = new Hono<{ Bindings: { DB: D1Database } }>();
+export const contactRouter = new Hono<Env>();
+
+contactRouter.use('*', async (c, next) => {
+  if (!c.get('tenantId')) return c.json({ error: 'Tenant ID required' }, 401);
+  await next();
+});
 
 contactRouter.get('/', async (c) => {
-  const orgId = c.req.query('organization_id');
-  let result;
-  if (orgId) {
-    result = await contacts.getByOrganizationId(c.env.DB, Number(orgId));
-  } else {
-    result = await contacts.getAll(c.env.DB);
-  }
-  return c.json(result);
+  const data = await contacts.getAll(c.env.DB, c.get('tenantId')!);
+  return c.json(data);
 });
 
 contactRouter.get('/:id', async (c) => {
-  const contact = await contacts.getById(c.env.DB, Number(c.req.param('id')));
+  const contact = await contacts.getById(c.env.DB, c.get('tenantId')!, Number(c.req.param('id')));
   if (!contact) return c.json({ error: 'Not found' }, 404);
   return c.json(contact);
 });
 
-contactRouter.post('/batch', async (c) => {
-  const body = await c.req.json();
-  if (!Array.isArray(body)) return c.json({ error: 'Expected an array' }, 400);
-  
-  const db = c.env.DB;
-  const stmts = body.map(contact => {
-    return db.prepare(
-      'INSERT INTO contacts (organization_id, name, email, phone, job_title, status) VALUES (?1, ?2, ?3, ?4, ?5, ?6)'
-    ).bind(
-      contact.organization_id || null,
-      contact.name,
-      contact.email || null,
-      contact.phone || null,
-      contact.job_title || null,
-      contact.status || 'lead'
-    );
-  });
-  
-  await db.batch(stmts);
-  return c.json({ success: true, count: stmts.length }, 201);
-});
-
 contactRouter.post('/', async (c) => {
   const body = await c.req.json();
-  const contact = await contacts.create(c.env.DB, body);
+  const contact = await contacts.create(c.env.DB, c.get('tenantId')!, body);
   return c.json(contact, 201);
+});
+
+contactRouter.post('/batch', async (c) => {
+  const items = await c.req.json();
+  if (!Array.isArray(items)) return c.json({ error: 'Expected an array' }, 400);
+
+  const tenantId = c.get('tenantId')!;
+  const statements = items.map(item => {
+    return c.env.DB.prepare(`INSERT INTO contacts (tenant_id, name, email, phone, job_title, status) VALUES (?1, ?2, ?3, ?4, ?5, ?6)`)
+      .bind(
+        tenantId,
+        item.name,
+        item.email || null,
+        item.phone || null,
+        item.job_title || null,
+        item.status || 'lead'
+      );
+  });
+
+  try {
+    const results = await c.env.DB.batch(statements);
+    return c.json({ inserted: results.length }, 201);
+  } catch (err) {
+    console.error('Batch insert failed:', err);
+    return c.json({ error: 'Batch insert failed' }, 500);
+  }
 });
 
 contactRouter.put('/:id', async (c) => {
   const body = await c.req.json();
-  const contact = await contacts.update(c.env.DB, Number(c.req.param('id')), body);
+  const contact = await contacts.update(c.env.DB, c.get('tenantId')!, Number(c.req.param('id')), body);
   if (!contact) return c.json({ error: 'Not found' }, 404);
   return c.json(contact);
 });
 
 contactRouter.delete('/:id', async (c) => {
-  await contacts.delete(c.env.DB, Number(c.req.param('id')));
+  await contacts.delete(c.env.DB, c.get('tenantId')!, Number(c.req.param('id')));
   return new Response(null, { status: 204 });
-});
-
-// Nested activities
-contactRouter.get('/:id/activities', async (c) => {
-  const result = await activities.getByContactId(c.env.DB, Number(c.req.param('id')));
-  return c.json(result);
 });

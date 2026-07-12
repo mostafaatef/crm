@@ -1,6 +1,12 @@
 import { Hono } from 'hono';
+import { Env } from '../index';
 
-export const aiRouter = new Hono<{ Bindings: { AI: any } }>();
+export const aiRouter = new Hono<Env>();
+
+aiRouter.use('*', async (c, next) => {
+  if (!c.get('tenantId')) return c.json({ error: 'Tenant ID required' }, 401);
+  await next();
+});
 
 aiRouter.post('/draft-email', async (c) => {
   const { name, jobTitle, organization } = await c.req.json();

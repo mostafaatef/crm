@@ -1,7 +1,6 @@
 import type { D1Database, Fetcher } from '@cloudflare/workers-types';
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
-import { basicAuth } from 'hono/basic-auth';
 
 import { organizationRouter } from './routes/organizations';
 import { contactRouter } from './routes/contacts';
@@ -13,17 +12,26 @@ import { attachmentsRouter } from './routes/attachments';
 import { searchRouter } from './routes/search';
 import { exportRouter } from './routes/export';
 import { aiRouter } from './routes/ai';
+import { tenantRouter } from './routes/tenants';
 
-const app = new Hono<{ Bindings: { DB: D1Database; ASSETS: Fetcher; AI: any; AUTH_USERNAME?: string; AUTH_PASSWORD?: string } }>();
+export type Env = {
+  Bindings: { DB: D1Database; ASSETS: Fetcher; AI: any; AUTH_USERNAME?: string; AUTH_PASSWORD?: string };
+  Variables: { tenantId?: number };
+};
 
-app.use('*', async (c, next) => {
-  const username = c.env.AUTH_USERNAME || 'admin';
-  const password = c.env.AUTH_PASSWORD || 'password123';
-  const auth = basicAuth({ username, password });
-  return auth(c, next);
-});
+const app = new Hono<Env>();
+
+// Removed basicAuth as per user rules.
 
 app.use('/api/*', cors());
+
+app.use('/api/*', async (c, next) => {
+  const tenantIdHeader = c.req.header('X-Tenant-ID');
+  if (tenantIdHeader) {
+    c.set('tenantId', parseInt(tenantIdHeader, 10));
+  }
+  await next();
+});
 
 app.route('/api/organizations', organizationRouter);
 app.route('/api/contacts', contactRouter);
@@ -35,6 +43,7 @@ app.route('/api/attachments', attachmentsRouter);
 app.route('/api/search', searchRouter);
 app.route('/api/export', exportRouter);
 app.route('/api/ai', aiRouter);
+app.route('/api/tenants', tenantRouter);
 
 // Fallback for Single Page Application
 app.get('*', async (c) => {

@@ -1,19 +1,25 @@
-import type { D1Database } from '@cloudflare/workers-types';
 import { Hono } from 'hono';
+import { Env } from '../index';
 
-export const dashboardRouter = new Hono<{ Bindings: { DB: D1Database } }>();
+export const dashboardRouter = new Hono<Env>();
+
+dashboardRouter.use('*', async (c, next) => {
+  if (!c.get('tenantId')) return c.json({ error: 'Tenant ID required' }, 401);
+  await next();
+});
 
 dashboardRouter.get('/', async (c) => {
   const db = c.env.DB;
+  const tenantId = c.get('tenantId')!;
   
   // 1. KPIs
   const kpiRow = await db.prepare(`
     SELECT 
-      (SELECT SUM(value) FROM deals WHERE stage NOT IN ('Won', 'Lost')) as totalPipeline,
-      (SELECT SUM(value) FROM deals WHERE stage = 'Won') as totalRevenue,
-      (SELECT SUM(amount) FROM expenses) as totalExpenses,
-      (SELECT SUM(amount) FROM invoices WHERE status IN ('Sent', 'Overdue')) as outstandingReceivables
-  `).first() as any;
+      (SELECT SUM(value) FROM deals WHERE tenant_id = ?1 AND stage NOT IN ('Won', 'Lost')) as totalPipeline,
+      (SELECT SUM(value) FROM deals WHERE tenant_id = ?1 AND stage = 'Won') as totalRevenue,
+      (SELECT SUM(amount) FROM expenses WHERE tenant_id = ?1) as totalExpenses,
+      (SELECT SUM(amount) FROM invoices WHERE tenant_id = ?1 AND status IN ('Sent', 'Overdue')) as outstandingReceivables
+  `).bind(tenantId).first() as any;
 
   const kpis = {
     totalPipeline: kpiRow?.totalPipeline || 0,
@@ -30,18 +36,18 @@ dashboardRouter.get('/', async (c) => {
       COUNT(id) as dealsWon,
       SUM(value) as revenue
     FROM deals
-    WHERE stage = 'Won' AND close_date IS NOT NULL
+    WHERE tenant_id = ?1 AND stage = 'Won' AND close_date IS NOT NULL
     GROUP BY strftime('%Y-%m', close_date)
-  `).all();
+  `).bind(tenantId).all();
 
   const { results: expensesRaw } = await db.prepare(`
     SELECT 
       strftime('%Y-%m', date_incurred) as month,
       SUM(amount) as expenses
     FROM expenses
-    WHERE date_incurred IS NOT NULL
+    WHERE tenant_id = ?1 AND date_incurred IS NOT NULL
     GROUP BY strftime('%Y-%m', date_incurred)
-  `).all();
+  `).bind(tenantId).all();
 
   // Merge revenue and expenses by month
   const metricsMap: Record<string, any> = {};
@@ -73,9 +79,10 @@ dashboardRouter.get('/', async (c) => {
     FROM activities a
     LEFT JOIN contacts c ON a.contact_id = c.id
     LEFT JOIN deals d ON a.deal_id = d.id
+    WHERE a.tenant_id = ?1
     ORDER BY a.created_at DESC
     LIMIT 10
-  `).all();
+  `).bind(tenantId).all();
 
   // 4. Open Tasks (due_date is not null and done = 0)
   const { results: openTasksRaw } = await db.prepare(`
@@ -86,9 +93,9 @@ dashboardRouter.get('/', async (c) => {
     FROM activities a
     LEFT JOIN contacts c ON a.contact_id = c.id
     LEFT JOIN deals d ON a.deal_id = d.id
-    WHERE a.due_date IS NOT NULL AND a.done = 0
+    WHERE a.tenant_id = ?1 AND a.due_date IS NOT NULL AND a.done = 0
     ORDER BY a.due_date ASC
-  `).all();
+  `).bind(tenantId).all();
 
   return c.json({
     kpis,
