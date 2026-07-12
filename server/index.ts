@@ -45,4 +45,24 @@ app.route('/api/export', exportRouter);
 app.route('/api/ai', aiRouter);
 app.route('/api/tenants', tenantRouter);
 
+// Fallback for Single Page Application
+app.get('*', async (c) => {
+  if (c.req.path.startsWith('/api/')) {
+    return c.notFound();
+  }
+  
+  if (c.env.ASSETS) {
+    try {
+      const url = new URL(c.req.url);
+      url.pathname = '/';
+      const res = await c.env.ASSETS.fetch(new Request(url.toString()) as any) as any;
+      if (res.ok) return res;
+    } catch (e) {
+      console.error('ASSETS fetch failed:', e);
+    }
+  }
+  
+  return c.notFound();
+});
+
 export default app;
