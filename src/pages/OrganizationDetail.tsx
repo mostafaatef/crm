@@ -55,7 +55,19 @@ const OrganizationDetail: React.FC = () => {
       </div>
 
       <div className="card" style={{ marginBottom: '24px' }}>
-        <p><strong>Website:</strong> {org.website || 'N/A'}</p>
+        <p>
+          <strong>Website:</strong>{' '}
+          {org.website ? (
+            <a 
+              href={org.website.startsWith('http') ? org.website : `https://${org.website}`} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              style={{ color: 'var(--color-primary)', textDecoration: 'none' }}
+            >
+              {org.website}
+            </a>
+          ) : 'N/A'}
+        </p>
         <p><strong>Industry:</strong> {org.industry || 'N/A'}</p>
         <p><strong>Notes:</strong> {org.notes || 'N/A'}</p>
       </div>

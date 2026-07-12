@@ -82,7 +82,20 @@ const Organizations: React.FC = () => {
 
   const columns = [
     { header: 'Name', accessor: 'name' as keyof Organization },
-    { header: 'Website', accessor: 'website' as keyof Organization },
+    { 
+      header: 'Website', 
+      accessor: (org: Organization) => org.website ? (
+        <a 
+          href={org.website.startsWith('http') ? org.website : `https://${org.website}`} 
+          target="_blank" 
+          rel="noopener noreferrer"
+          style={{ color: 'var(--color-primary)', textDecoration: 'none' }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          {org.website}
+        </a>
+      ) : '-' 
+    },
     { header: 'Industry', accessor: 'industry' as keyof Organization },
     { 
       header: 'Actions', 
