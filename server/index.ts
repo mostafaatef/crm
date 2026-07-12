@@ -45,15 +45,4 @@ app.route('/api/export', exportRouter);
 app.route('/api/ai', aiRouter);
 app.route('/api/tenants', tenantRouter);
 
-// Fallback for Single Page Application
-app.get('*', async (c) => {
-  if (c.req.path.startsWith('/api/')) {
-    return c.notFound();
-  }
-  // Let the ASSETS binding serve the index.html for unknown paths
-  const url = new URL(c.req.url);
-  url.pathname = '/';
-  return c.env.ASSETS.fetch(new Request(url.toString(), c.req.raw as any) as any) as any;
-});
-
 export default app;

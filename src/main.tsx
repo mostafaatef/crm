@@ -6,7 +6,7 @@ import { TenantProvider } from './context/TenantContext';
 import { getTenantId } from './lib/api';
 
 // Intercept window.fetch to inject X-Tenant-ID header globally
-const originalFetch = window.fetch;
+const originalFetch = window.fetch.bind(window);
 window.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
   const url = typeof input === 'string' ? input : (input instanceof Request ? input.url : input.toString());
   

@@ -10,6 +10,7 @@ interface TenantContextType {
   tenants: Tenant[];
   currentTenantId: number | null;
   setCurrentTenantId: (id: number) => void;
+  refreshTenants: () => Promise<void>;
   isLoading: boolean;
 }
 
@@ -20,27 +21,33 @@ export const TenantProvider = ({ children }: { children: ReactNode }) => {
   const [currentTenantId, setCurrentTenantIdState] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  const fetchTenants = async () => {
+    try {
+      const res = await fetch('/api/tenants');
+      const data = await res.json();
+      const tenantsData = data as Tenant[];
+      setTenants(tenantsData);
+      const storedId = getTenantId();
+      if (storedId && tenantsData.find((t: Tenant) => t.id === parseInt(storedId))) {
+        setCurrentTenantIdState(parseInt(storedId));
+      } else if (tenantsData.length > 0) {
+        setCurrentTenantIdState(tenantsData[0].id);
+        setLocalTenantId(tenantsData[0].id.toString());
+      }
+      setIsLoading(false);
+    } catch (err) {
+      console.error('Failed to load tenants', err);
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
-    // We cannot use apiFetch here easily without circular dependencies or just plain fetch is fine since we don't need tenant ID to fetch tenants
-    fetch('/api/tenants')
-      .then(res => res.json())
-      .then((data: unknown) => {
-        const tenantsData = data as Tenant[];
-        setTenants(tenantsData);
-        const storedId = getTenantId();
-        if (storedId && tenantsData.find((t: Tenant) => t.id === parseInt(storedId))) {
-          setCurrentTenantIdState(parseInt(storedId));
-        } else if (tenantsData.length > 0) {
-          setCurrentTenantIdState(tenantsData[0].id);
-          setLocalTenantId(tenantsData[0].id.toString());
-        }
-        setIsLoading(false);
-      })
-      .catch(err => {
-        console.error('Failed to load tenants', err);
-        setIsLoading(false);
-      });
+    fetchTenants();
   }, []);
+
+  const refreshTenants = async () => {
+    await fetchTenants();
+  };
 
   const setCurrentTenantId = (id: number) => {
     setCurrentTenantIdState(id);
@@ -49,8 +56,12 @@ export const TenantProvider = ({ children }: { children: ReactNode }) => {
     window.location.reload();
   };
 
+  if (isLoading) {
+    return <div style={{ padding: '24px' }}>Loading Workspace...</div>;
+  }
+
   return (
-    <TenantContext.Provider value={{ tenants, currentTenantId, setCurrentTenantId, isLoading }}>
+    <TenantContext.Provider value={{ tenants, currentTenantId, setCurrentTenantId, refreshTenants, isLoading }}>
       {children}
     </TenantContext.Provider>
   );

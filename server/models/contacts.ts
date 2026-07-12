@@ -14,7 +14,13 @@ export interface Contact {
 
 export const contacts = {
   getAll: async (db: D1Database, tenantId: number) => {
-    const { results } = await db.prepare('SELECT * FROM contacts WHERE tenant_id = ? ORDER BY name ASC').bind(tenantId).all<Contact>();
+    const { results } = await db.prepare(`
+      SELECT c.*, o.name as organization_name 
+      FROM contacts c 
+      LEFT JOIN organizations o ON c.organization_id = o.id 
+      WHERE c.tenant_id = ? 
+      ORDER BY c.name ASC
+    `).bind(tenantId).all<Contact & { organization_name: string | null }>();
     return results;
   },
   getById: async (db: D1Database, tenantId: number, id: number) => {

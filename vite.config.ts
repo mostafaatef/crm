@@ -9,12 +9,7 @@ export default defineConfig({
       entry: 'server/index.ts',
       adapter,
       exclude: [
-        /^\/@.+$/,
-        /.*\.(ts|tsx|vue|svelte|css)($|\?)/,
-        /.*\.(s?css|less)($|\?)/,
-        /^\/favicon\.ico$/,
-        /.*\.(svg|png)($|\?)/,
-        /^\/(src|node_modules)\/.*/,
+        /^(?!\/api).*/,
       ]
     }),
     react()
