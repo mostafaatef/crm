@@ -14,3 +14,6 @@ database_id = "20871eab-b731-4683-ad37-309a1319f795"
 [[r2_buckets]]
 binding = "BUCKET"
 bucket_name = "crm-attachments"
+
+[ai]
+binding = "AI"

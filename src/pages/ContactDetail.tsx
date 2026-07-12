@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '../components/ui/Button';
 import { ActivityTimeline } from '../components/ui/ActivityTimeline';
+import AIEmailDrafter from '../components/AIEmailDrafter';
 
 interface Contact {
   id: number;
@@ -30,9 +31,16 @@ const ContactDetail: React.FC = () => {
 
   return (
     <div>
-      <div className="page-header" style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
-        <Button variant="ghost" onClick={() => navigate('/contacts')}>&larr; Back</Button>
-        <h1 className="page-title">{contact.name}</h1>
+      <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+          <Button variant="ghost" onClick={() => navigate('/contacts')}>&larr; Back</Button>
+          <h1 className="page-title" style={{ marginBottom: 0 }}>{contact.name}</h1>
+        </div>
+        <AIEmailDrafter 
+          contactName={contact.name} 
+          jobTitle={contact.job_title} 
+          organization={contact.organization_name} 
+        />
       </div>
 
       <div className="card">

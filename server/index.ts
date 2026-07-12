@@ -12,8 +12,9 @@ import { financeRouter } from './routes/finance';
 import { attachmentsRouter } from './routes/attachments';
 import { searchRouter } from './routes/search';
 import { exportRouter } from './routes/export';
+import { aiRouter } from './routes/ai';
 
-const app = new Hono<{ Bindings: { DB: D1Database; ASSETS: Fetcher; AUTH_USERNAME?: string; AUTH_PASSWORD?: string } }>();
+const app = new Hono<{ Bindings: { DB: D1Database; ASSETS: Fetcher; AI: any; AUTH_USERNAME?: string; AUTH_PASSWORD?: string } }>();
 
 app.use('*', async (c, next) => {
   const username = c.env.AUTH_USERNAME || 'admin';
@@ -33,6 +34,7 @@ app.route('/api/finance', financeRouter);
 app.route('/api/attachments', attachmentsRouter);
 app.route('/api/search', searchRouter);
 app.route('/api/export', exportRouter);
+app.route('/api/ai', aiRouter);
 
 // Fallback for Single Page Application
 app.get('*', async (c) => {
