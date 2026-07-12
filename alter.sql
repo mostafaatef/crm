@@ -1,0 +1,2 @@
+ALTER TABLE invoices ADD COLUMN notes TEXT;
+ALTER TABLE payments ADD COLUMN notes TEXT;

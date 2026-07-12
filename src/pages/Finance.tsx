@@ -3,6 +3,21 @@ import { useNavigate } from 'react-router-dom';
 import { Table } from '../components/ui/Table';
 import { FinanceOverview } from '../components/FinanceOverview';
 
+const TruncatedCell = ({ text }: { text: string }) => {
+  if (!text) return <span style={{ color: 'var(--color-text-muted)' }}>-</span>;
+  return (
+    <div title={text} style={{ 
+      maxWidth: '200px', 
+      whiteSpace: 'nowrap', 
+      overflow: 'hidden', 
+      textOverflow: 'ellipsis',
+      cursor: 'help'
+    }}>
+      {text}
+    </div>
+  );
+};
+
 const Finance: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'overview' | 'contracts' | 'estimates' | 'subcontracts' | 'expenses' | 'invoices'>('overview');
   const [data, setData] = useState<any[]>([]);
@@ -33,6 +48,7 @@ const Finance: React.FC = () => {
               { header: 'Status', accessor: 'status' },
               { header: 'Total Value', accessor: (c: any) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(c.total_value) },
               { header: 'Signed Date', accessor: (c: any) => c.signed_date || 'N/A' },
+              { header: 'Scope', accessor: (c: any) => <TruncatedCell text={c.scope_of_work} /> },
             ]}
             onRowClick={(row) => navigate(`/deals/${row.deal_id}`)}
           />
@@ -49,6 +65,7 @@ const Finance: React.FC = () => {
               { header: 'Amount', accessor: (i: any) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(i.amount) },
               { header: 'Issue Date', accessor: (i: any) => i.issue_date || 'N/A' },
               { header: 'Due Date', accessor: (i: any) => i.due_date || 'N/A' },
+              { header: 'Notes', accessor: (i: any) => <TruncatedCell text={i.notes} /> },
             ]}
             onRowClick={(row) => navigate(`/deals/${row.deal_id}`)}
           />
@@ -63,6 +80,7 @@ const Finance: React.FC = () => {
               { header: 'Status', accessor: 'status' },
               { header: 'Total Amount', accessor: (e: any) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(e.total_amount) },
               { header: 'Valid Until', accessor: (e: any) => e.valid_until || 'N/A' },
+              { header: 'Notes', accessor: (e: any) => <TruncatedCell text={e.notes} /> },
             ]}
             onRowClick={(row) => navigate(`/deals/${row.deal_id}`)}
           />
@@ -76,6 +94,7 @@ const Finance: React.FC = () => {
               { header: 'Subcontractor', accessor: (s: any) => s.subcontractor_name || `Org ID: ${s.subcontractor_organization_id}` },
               { header: 'Status', accessor: 'status' },
               { header: 'Committed Value', accessor: (s: any) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(s.committed_value) },
+              { header: 'Scope', accessor: (s: any) => <TruncatedCell text={s.scope_of_work} /> },
             ]}
             onRowClick={(row) => navigate(`/deals/${row.deal_id}`)}
           />
@@ -90,6 +109,7 @@ const Finance: React.FC = () => {
               { header: 'Amount', accessor: (e: any) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(e.amount) },
               { header: 'Date Incurred', accessor: (e: any) => e.date_incurred || 'N/A' },
               { header: 'Vendor', accessor: (e: any) => e.vendor_name || 'N/A' },
+              { header: 'Description', accessor: (e: any) => <TruncatedCell text={e.description} /> },
             ]}
             onRowClick={(row) => navigate(`/deals/${row.deal_id}`)}
           />

@@ -20,11 +20,15 @@ export const finance = {
     const subRow = await db.prepare('SELECT SUM(committed_value) as total FROM subcontracts WHERE tenant_id = ? AND status != ?').bind(tenantId, 'Draft').first<{total: number}>();
     const subcontracts = subRow?.total || 0;
 
+    const estimateRow = await db.prepare('SELECT SUM(total_amount) as total FROM estimates WHERE tenant_id = ? AND status != ?').bind(tenantId, 'Rejected').first<{total: number}>();
+    const potentialRevenue = estimateRow?.total || 0;
+
     const costs = expenses + subcontracts;
     const profit = revenue - costs;
 
     return {
       revenue,
+      potentialRevenue,
       costs,
       expenses,
       subcontracts,
@@ -108,11 +112,11 @@ export const finance = {
     return (await db.prepare('SELECT * FROM invoices WHERE tenant_id = ? AND contract_id = ? ORDER BY issue_date DESC').bind(tenantId, contractId).all()).results;
   },
   createInvoice: async (db: D1Database, tenantId: number, data: any) => {
-    return await db.prepare('INSERT INTO invoices (tenant_id, contract_id, invoice_number, status, amount, issue_date, due_date) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7) RETURNING *')
-      .bind(tenantId, data.contract_id, data.invoice_number, data.status || 'Draft', data.amount || 0, data.issue_date || null, data.due_date || null).first();
+    return await db.prepare('INSERT INTO invoices (tenant_id, contract_id, invoice_number, status, amount, issue_date, due_date, notes) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8) RETURNING *')
+      .bind(tenantId, data.contract_id, data.invoice_number, data.status || 'Draft', data.amount || 0, data.issue_date || null, data.due_date || null, data.notes || null).first();
   },
   updateInvoice: async (db: D1Database, tenantId: number, id: number, data: any) => {
-    const q = buildUpdateQuery('invoices', ['status', 'amount', 'issue_date', 'due_date'], data, tenantId, id);
+    const q = buildUpdateQuery('invoices', ['status', 'amount', 'issue_date', 'due_date', 'notes'], data, tenantId, id);
     if (!q) return await db.prepare('SELECT * FROM invoices WHERE tenant_id = ? AND id = ?').bind(tenantId, id).first();
     return await db.prepare(q.query).bind(...q.values).first();
   },
@@ -122,7 +126,7 @@ export const finance = {
     return (await db.prepare('SELECT * FROM payments WHERE tenant_id = ? AND invoice_id = ? ORDER BY payment_date DESC').bind(tenantId, invoiceId).all()).results;
   },
   createPayment: async (db: D1Database, tenantId: number, data: any) => {
-    return await db.prepare('INSERT INTO payments (tenant_id, invoice_id, amount, payment_date, method) VALUES (?1, ?2, ?3, ?4, ?5) RETURNING *')
-      .bind(tenantId, data.invoice_id, data.amount || 0, data.payment_date || null, data.method || null).first();
+    return await db.prepare('INSERT INTO payments (tenant_id, invoice_id, amount, payment_date, method, notes) VALUES (?1, ?2, ?3, ?4, ?5, ?6) RETURNING *')
+      .bind(tenantId, data.invoice_id, data.amount || 0, data.payment_date || null, data.method || null, data.notes || null).first();
   }
 };

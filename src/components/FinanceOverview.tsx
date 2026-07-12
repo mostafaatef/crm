@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 
 interface FinanceOverviewData {
   revenue: number;
+  potentialRevenue: number;
   costs: number;
   expenses: number;
   subcontracts: number;
@@ -37,6 +38,11 @@ export const FinanceOverview: React.FC = () => {
           <p style={{ fontSize: '24px', fontWeight: 600, color: 'var(--color-text)' }}>{formatCurrency(data.revenue)}</p>
         </div>
         
+        <div style={{ padding: '16px', background: 'var(--color-bg)', border: '1px solid var(--color-border)', borderRadius: '8px' }}>
+          <h3 style={{ fontSize: '14px', color: 'var(--color-text-light)', marginBottom: '8px' }}>Potential Revenue (Estimates)</h3>
+          <p style={{ fontSize: '24px', fontWeight: 600, color: 'var(--color-text-muted)' }}>{formatCurrency(data.potentialRevenue)}</p>
+        </div>
+
         <div style={{ padding: '16px', background: 'var(--color-bg)', border: '1px solid var(--color-border)', borderRadius: '8px' }}>
           <h3 style={{ fontSize: '14px', color: 'var(--color-text-light)', marginBottom: '8px' }}>Total Costs</h3>
           <p style={{ fontSize: '24px', fontWeight: 600, color: 'var(--color-text)' }}>{formatCurrency(data.costs)}</p>

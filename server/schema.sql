@@ -139,9 +139,10 @@ CREATE TABLE IF NOT EXISTS invoices (
   contract_id INTEGER NOT NULL,
   invoice_number TEXT NOT NULL,
   status TEXT DEFAULT 'Draft', -- Draft, Sent, Paid, Overdue
-  amount INTEGER DEFAULT 0,
+  amount DECIMAL(10, 2) NOT NULL,
   issue_date DATE,
   due_date DATE,
+  notes TEXT,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (tenant_id) REFERENCES tenants (id) ON DELETE CASCADE,
   FOREIGN KEY (contract_id) REFERENCES contracts (id) ON DELETE CASCADE
@@ -154,6 +155,7 @@ CREATE TABLE IF NOT EXISTS payments (
   amount INTEGER DEFAULT 0,
   payment_date DATE,
   method TEXT, -- Transfer, Check, Cash, Credit Card
+  notes TEXT,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (tenant_id) REFERENCES tenants (id) ON DELETE CASCADE,
   FOREIGN KEY (invoice_id) REFERENCES invoices (id) ON DELETE CASCADE

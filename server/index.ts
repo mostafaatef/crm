@@ -1,6 +1,7 @@
 import type { D1Database, Fetcher, R2Bucket } from '@cloudflare/workers-types';
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
+import { basicAuth } from 'hono/basic-auth';
 
 import { organizationRouter } from './routes/organizations';
 import { contactRouter } from './routes/contacts';
@@ -21,8 +22,17 @@ export type Env = {
 
 const app = new Hono<Env>();
 
-// Removed basicAuth as per user rules.
-
+// Enforce basic auth if credentials are provided in the environment
+app.use('*', async (c, next) => {
+  if (c.env.AUTH_USERNAME && c.env.AUTH_PASSWORD) {
+    const auth = basicAuth({
+      username: c.env.AUTH_USERNAME,
+      password: c.env.AUTH_PASSWORD,
+    });
+    return auth(c, next);
+  }
+  await next();
+});
 app.use('/api/*', cors());
 
 app.use('/api/*', async (c, next) => {
