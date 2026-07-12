@@ -14,6 +14,7 @@ const Layout: React.FC = () => {
           <NavLink to="/contacts" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>Contacts</NavLink>
           <NavLink to="/deals" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>Deals</NavLink>
           <NavLink to="/pipeline" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>Pipeline</NavLink>
+          <NavLink to="/finance" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>Finance</NavLink>
         </nav>
       </aside>
       <main className="main-content">

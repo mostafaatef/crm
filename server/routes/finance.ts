@@ -5,6 +5,10 @@ import { finance } from '../models/finance';
 export const financeRouter = new Hono<{ Bindings: { DB: D1Database } }>();
 
 // Contracts
+financeRouter.get('/contracts/all', async (c) => {
+  const result = await finance.getAllContracts(c.env.DB);
+  return c.json(result);
+});
 financeRouter.get('/deals/:dealId/contracts', async (c) => {
   const result = await finance.getContractsByDealId(c.env.DB, Number(c.req.param('dealId')));
   return c.json(result);
@@ -24,6 +28,10 @@ financeRouter.put('/contracts/:id', async (c) => {
 });
 
 // Subcontracts
+financeRouter.get('/subcontracts/all', async (c) => {
+  const result = await finance.getAllSubcontracts(c.env.DB);
+  return c.json(result);
+});
 financeRouter.get('/deals/:dealId/subcontracts', async (c) => {
   const result = await finance.getSubcontractsByDealId(c.env.DB, Number(c.req.param('dealId')));
   return c.json(result);
@@ -43,6 +51,10 @@ financeRouter.put('/subcontracts/:id', async (c) => {
 });
 
 // Expenses
+financeRouter.get('/expenses/all', async (c) => {
+  const result = await finance.getAllExpenses(c.env.DB);
+  return c.json(result);
+});
 financeRouter.get('/deals/:dealId/expenses', async (c) => {
   const result = await finance.getExpensesByDealId(c.env.DB, Number(c.req.param('dealId')));
   return c.json(result);
@@ -62,6 +74,10 @@ financeRouter.put('/expenses/:id', async (c) => {
 });
 
 // Estimates
+financeRouter.get('/estimates/all', async (c) => {
+  const result = await finance.getAllEstimates(c.env.DB);
+  return c.json(result);
+});
 financeRouter.get('/deals/:dealId/estimates', async (c) => {
   const result = await finance.getEstimatesByDealId(c.env.DB, Number(c.req.param('dealId')));
   return c.json(result);
@@ -81,6 +97,10 @@ financeRouter.put('/estimates/:id', async (c) => {
 });
 
 // Invoices
+financeRouter.get('/invoices/all', async (c) => {
+  const result = await finance.getAllInvoices(c.env.DB);
+  return c.json(result);
+});
 financeRouter.get('/contracts/:contractId/invoices', async (c) => {
   const result = await finance.getInvoicesByContractId(c.env.DB, Number(c.req.param('contractId')));
   return c.json(result);

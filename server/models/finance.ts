@@ -10,6 +10,9 @@ function buildUpdateQuery(tableName: string, fields: string[], data: any, id: nu
 
 export const finance = {
   // Contracts
+  getAllContracts: async (db: D1Database) => {
+    return (await db.prepare('SELECT c.*, d.name as deal_name FROM contracts c LEFT JOIN deals d ON c.deal_id = d.id ORDER BY c.created_at DESC').all()).results;
+  },
   getContractsByDealId: async (db: D1Database, dealId: number) => {
     return (await db.prepare('SELECT * FROM contracts WHERE deal_id = ? ORDER BY created_at DESC').bind(dealId).all()).results;
   },
@@ -24,6 +27,9 @@ export const finance = {
   },
 
   // Subcontracts
+  getAllSubcontracts: async (db: D1Database) => {
+    return (await db.prepare('SELECT s.*, o.name as subcontractor_name, d.name as deal_name FROM subcontracts s LEFT JOIN organizations o ON s.subcontractor_organization_id = o.id LEFT JOIN deals d ON s.deal_id = d.id ORDER BY s.created_at DESC').all()).results;
+  },
   getSubcontractsByDealId: async (db: D1Database, dealId: number) => {
     return (await db.prepare('SELECT s.*, o.name as subcontractor_name FROM subcontracts s LEFT JOIN organizations o ON s.subcontractor_organization_id = o.id WHERE s.deal_id = ? ORDER BY s.created_at DESC').bind(dealId).all()).results;
   },
@@ -38,6 +44,9 @@ export const finance = {
   },
   
   // Expenses
+  getAllExpenses: async (db: D1Database) => {
+    return (await db.prepare('SELECT e.*, d.name as deal_name FROM expenses e LEFT JOIN deals d ON e.deal_id = d.id ORDER BY e.date_incurred DESC').all()).results;
+  },
   getExpensesByDealId: async (db: D1Database, dealId: number) => {
     return (await db.prepare('SELECT * FROM expenses WHERE deal_id = ? ORDER BY date_incurred DESC').bind(dealId).all()).results;
   },
@@ -52,6 +61,9 @@ export const finance = {
   },
 
   // Estimates
+  getAllEstimates: async (db: D1Database) => {
+    return (await db.prepare('SELECT e.*, d.name as deal_name FROM estimates e LEFT JOIN deals d ON e.deal_id = d.id ORDER BY e.created_at DESC').all()).results;
+  },
   getEstimatesByDealId: async (db: D1Database, dealId: number) => {
     return (await db.prepare('SELECT * FROM estimates WHERE deal_id = ? ORDER BY created_at DESC').bind(dealId).all()).results;
   },
@@ -66,6 +78,9 @@ export const finance = {
   },
   
   // Invoices
+  getAllInvoices: async (db: D1Database) => {
+    return (await db.prepare('SELECT i.*, c.contract_number, d.name as deal_name, d.id as deal_id FROM invoices i LEFT JOIN contracts c ON i.contract_id = c.id LEFT JOIN deals d ON c.deal_id = d.id ORDER BY i.issue_date DESC').all()).results;
+  },
   getInvoicesByContractId: async (db: D1Database, contractId: number) => {
     return (await db.prepare('SELECT * FROM invoices WHERE contract_id = ? ORDER BY issue_date DESC').bind(contractId).all()).results;
   },

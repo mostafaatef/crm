@@ -9,6 +9,7 @@ import ContactDetail from './pages/ContactDetail';
 import Deals from './pages/Deals';
 import DealDetail from './pages/DealDetail';
 import Pipeline from './pages/Pipeline';
+import Finance from './pages/Finance';
 
 function App() {
   return (
@@ -24,6 +25,7 @@ function App() {
           <Route path="deals" element={<Deals />} />
           <Route path="deals/:id" element={<DealDetail />} />
           <Route path="pipeline" element={<Pipeline />} />
+          <Route path="finance" element={<Finance />} />
         </Route>
       </Routes>
     </Router>
