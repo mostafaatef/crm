@@ -1,9 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, LineChart, Line, Legend } from 'recharts';
 
 interface DashboardData {
-  metrics: { month: string; dealsWon: number; revenue: number }[];
+  kpis: {
+    totalPipeline: number;
+    totalRevenue: number;
+    totalExpenses: number;
+    netProfit: number;
+    outstandingReceivables: number;
+  };
+  metrics: { month: string; dealsWon: number; revenue: number; expenses: number; profit: number }[];
   recentActivity: {
     id: number;
     type: string;
@@ -21,6 +28,8 @@ interface DashboardData {
     deal_name: string | null;
   }[];
 }
+
+const formatCurrency = (val: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(val);
 
 const Dashboard: React.FC = () => {
   const [data, setData] = useState<DashboardData | null>(null);
@@ -58,6 +67,30 @@ const Dashboard: React.FC = () => {
         <h1 className="page-title">Dashboard</h1>
       </div>
 
+      {/* KPI Row */}
+      <div style={{ display: 'flex', gap: '16px', marginBottom: '24px', flexWrap: 'wrap' }}>
+        <div className="card" style={{ flex: '1 1 150px', padding: '16px', textAlign: 'center', borderTop: '4px solid #94a3b8' }}>
+          <div style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)', fontWeight: 600, textTransform: 'uppercase', marginBottom: '8px' }}>Total Pipeline</div>
+          <div style={{ fontSize: '1.5rem', fontWeight: 700 }}>{formatCurrency(data.kpis.totalPipeline)}</div>
+        </div>
+        <div className="card" style={{ flex: '1 1 150px', padding: '16px', textAlign: 'center', borderTop: '4px solid #209dd7' }}>
+          <div style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)', fontWeight: 600, textTransform: 'uppercase', marginBottom: '8px' }}>Total Revenue</div>
+          <div style={{ fontSize: '1.5rem', fontWeight: 700 }}>{formatCurrency(data.kpis.totalRevenue)}</div>
+        </div>
+        <div className="card" style={{ flex: '1 1 150px', padding: '16px', textAlign: 'center', borderTop: '4px solid #ef4444' }}>
+          <div style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)', fontWeight: 600, textTransform: 'uppercase', marginBottom: '8px' }}>Total Expenses</div>
+          <div style={{ fontSize: '1.5rem', fontWeight: 700 }}>{formatCurrency(data.kpis.totalExpenses)}</div>
+        </div>
+        <div className="card" style={{ flex: '1 1 150px', padding: '16px', textAlign: 'center', borderTop: '4px solid #22c55e' }}>
+          <div style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)', fontWeight: 600, textTransform: 'uppercase', marginBottom: '8px' }}>Net Profit</div>
+          <div style={{ fontSize: '1.5rem', fontWeight: 700, color: data.kpis.netProfit < 0 ? '#ef4444' : 'inherit' }}>{formatCurrency(data.kpis.netProfit)}</div>
+        </div>
+        <div className="card" style={{ flex: '1 1 150px', padding: '16px', textAlign: 'center', borderTop: '4px solid #ecad0a' }}>
+          <div style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)', fontWeight: 600, textTransform: 'uppercase', marginBottom: '8px' }}>Unpaid Invoices</div>
+          <div style={{ fontSize: '1.5rem', fontWeight: 700 }}>{formatCurrency(data.kpis.outstandingReceivables)}</div>
+        </div>
+      </div>
+
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', marginBottom: '24px' }}>
         <div className="card">
           <h3 style={{ marginBottom: '16px' }}>Deals Won Per Month</h3>
@@ -78,19 +111,22 @@ const Dashboard: React.FC = () => {
         </div>
 
         <div className="card">
-          <h3 style={{ marginBottom: '16px' }}>Revenue Per Month (USD)</h3>
+          <h3 style={{ marginBottom: '16px' }}>Financials Per Month (USD)</h3>
           <div style={{ height: 300 }}>
             {data.metrics.length > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={data.metrics}>
                   <XAxis dataKey="month" />
                   <YAxis />
-                  <Tooltip formatter={(value: any) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(value)} />
-                  <Line type="monotone" dataKey="revenue" stroke="#ecad0a" strokeWidth={3} dot={{ r: 4 }} />
+                  <Tooltip formatter={(value: any) => formatCurrency(value)} />
+                  <Legend />
+                  <Line type="monotone" name="Revenue" dataKey="revenue" stroke="#209dd7" strokeWidth={3} dot={{ r: 4 }} />
+                  <Line type="monotone" name="Expenses" dataKey="expenses" stroke="#ef4444" strokeWidth={3} dot={{ r: 4 }} />
+                  <Line type="monotone" name="Net Profit" dataKey="profit" stroke="#22c55e" strokeWidth={3} dot={{ r: 4 }} />
                 </LineChart>
               </ResponsiveContainer>
             ) : (
-              <p className="table-empty">No revenue yet.</p>
+              <p className="table-empty">No financials yet.</p>
             )}
           </div>
         </div>
