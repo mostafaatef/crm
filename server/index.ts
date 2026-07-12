@@ -1,4 +1,4 @@
-import type { D1Database, Fetcher } from '@cloudflare/workers-types';
+import type { D1Database, Fetcher, R2Bucket } from '@cloudflare/workers-types';
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 
@@ -15,7 +15,7 @@ import { aiRouter } from './routes/ai';
 import { tenantRouter } from './routes/tenants';
 
 export type Env = {
-  Bindings: { DB: D1Database; ASSETS: Fetcher; AI: any; AUTH_USERNAME?: string; AUTH_PASSWORD?: string };
+  Bindings: { DB: D1Database; ASSETS: Fetcher; BUCKET: R2Bucket; AI: any; AUTH_USERNAME?: string; AUTH_PASSWORD?: string };
   Variables: { tenantId?: number };
 };
 

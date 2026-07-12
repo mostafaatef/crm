@@ -24,14 +24,15 @@ export const TenantProvider = ({ children }: { children: ReactNode }) => {
     // We cannot use apiFetch here easily without circular dependencies or just plain fetch is fine since we don't need tenant ID to fetch tenants
     fetch('/api/tenants')
       .then(res => res.json())
-      .then(data => {
-        setTenants(data);
+      .then((data: unknown) => {
+        const tenantsData = data as Tenant[];
+        setTenants(tenantsData);
         const storedId = getTenantId();
-        if (storedId && data.find((t: Tenant) => t.id === parseInt(storedId))) {
+        if (storedId && tenantsData.find((t: Tenant) => t.id === parseInt(storedId))) {
           setCurrentTenantIdState(parseInt(storedId));
-        } else if (data.length > 0) {
-          setCurrentTenantIdState(data[0].id);
-          setLocalTenantId(data[0].id.toString());
+        } else if (tenantsData.length > 0) {
+          setCurrentTenantIdState(tenantsData[0].id);
+          setLocalTenantId(tenantsData[0].id.toString());
         }
         setIsLoading(false);
       })
