@@ -10,6 +10,7 @@ import { activityRouter } from './routes/activities';
 import { dashboardRouter } from './routes/dashboard';
 import { financeRouter } from './routes/finance';
 import { attachmentsRouter } from './routes/attachments';
+import { searchRouter } from './routes/search';
 
 const app = new Hono<{ Bindings: { DB: D1Database; ASSETS: Fetcher; AUTH_USERNAME?: string; AUTH_PASSWORD?: string } }>();
 
@@ -29,6 +30,7 @@ app.route('/api/activities', activityRouter);
 app.route('/api/dashboard', dashboardRouter);
 app.route('/api/finance', financeRouter);
 app.route('/api/attachments', attachmentsRouter);
+app.route('/api/search', searchRouter);
 
 // Fallback for Single Page Application
 app.get('*', async (c) => {

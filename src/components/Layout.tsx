@@ -1,5 +1,6 @@
 import React from 'react';
 import { Outlet, NavLink } from 'react-router-dom';
+import GlobalSearch from './GlobalSearch';
 
 const Layout: React.FC = () => {
   return (
@@ -18,6 +19,9 @@ const Layout: React.FC = () => {
         </nav>
       </aside>
       <main className="main-content">
+        <div style={{ display: 'flex', justifyContent: 'flex-end', paddingBottom: '16px', marginBottom: '24px', borderBottom: '1px solid var(--color-border)' }}>
+          <GlobalSearch />
+        </div>
         <Outlet />
       </main>
     </div>
