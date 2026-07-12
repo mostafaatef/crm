@@ -20,7 +20,7 @@ const Layout: React.FC = () => {
         body: JSON.stringify({ name: newTenantName.trim() })
       });
       if (res.ok) {
-        const newTenant = await res.json();
+        const newTenant = await res.json() as { id: number };
         await refreshTenants();
         setCurrentTenantId(newTenant.id);
         setIsAddTenantOpen(false);
