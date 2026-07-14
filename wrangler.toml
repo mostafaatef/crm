@@ -1,4 +1,4 @@
-name = "personal-crm"
+name = "crm"
 compatibility_date = "2024-03-20"
 main = "server/index.ts"
 
