@@ -92,6 +92,18 @@ export const ActivityTimeline: React.FC<ActivityTimelineProps> = ({ contactId, d
     }
   };
 
+  const handleDelete = async (id: number) => {
+    if (!window.confirm('Are you sure you want to delete this activity?')) return;
+    try {
+      const res = await fetch(`/api/activities/${id}`, { method: 'DELETE' });
+      if (res.ok) {
+        fetchActivities();
+      }
+    } catch (err) {
+      console.error('Failed to delete activity:', err);
+    }
+  };
+
   const getTypeIcon = (actType: string) => {
     switch(actType) {
       case 'call': return '📞';
@@ -187,12 +199,33 @@ export const ActivityTimeline: React.FC<ActivityTimelineProps> = ({ contactId, d
                 boxShadow: '0 2px 8px rgba(0,0,0,0.02)'
               }}>
                 <div className="activity-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                  <span className="activity-type" style={{ fontWeight: 600, color: 'var(--color-text)', textTransform: 'capitalize' }}>
-                    {act.type}
-                  </span>
-                  <span className="activity-date" style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>
-                    {new Date(act.created_at).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}
-                  </span>
+                  <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                    <span className="activity-type" style={{ fontWeight: 600, color: 'var(--color-text)', textTransform: 'capitalize' }}>
+                      {act.type}
+                    </span>
+                    <span className="activity-date" style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>
+                      {new Date(act.created_at).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}
+                    </span>
+                  </div>
+                  <button 
+                    onClick={() => handleDelete(act.id)}
+                    style={{ 
+                      background: 'transparent', 
+                      border: 'none', 
+                      cursor: 'pointer', 
+                      color: 'var(--color-text-muted)',
+                      padding: '4px',
+                      borderRadius: '4px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}
+                    title="Delete activity"
+                    onMouseOver={(e) => e.currentTarget.style.color = 'var(--color-danger)'}
+                    onMouseOut={(e) => e.currentTarget.style.color = 'var(--color-text-muted)'}
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+                  </button>
                 </div>
                 <p className="activity-desc" style={{ margin: '0 0 12px 0', color: 'var(--color-text-light)', lineHeight: '1.5' }}>
                   {act.description}
